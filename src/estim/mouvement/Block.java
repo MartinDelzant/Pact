@@ -26,7 +26,7 @@ public class Block {
 
 		if (block.hauteur != this.hauteur || block.largeur != this.largeur) {
 			return -1;
-		}
+		} 
 		float res = 0;
 		for (int i = 0; i < this.hauteur; i++) {
 			for (int j = 0; j < this.largeur; j++) {
