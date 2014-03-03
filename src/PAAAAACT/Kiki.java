@@ -292,7 +292,7 @@ public class Kiki {
 
        // while (mainframe.isVisible() ) {
         
-        for(int i = 0 ; i<=10 ; i++) {
+        //for(int i = 0 ; i<=10 ; i++) {
         	time = System.currentTimeMillis();
         	
            if (rgb_grabber != null) {
@@ -412,8 +412,8 @@ public class Kiki {
            
            time2 = System.currentTimeMillis();
            time3 = time2 - time ;
-           System.out.println("Temps : boucle "+ i + ", " + time3);
-        }
+           //System.out.println("Temps : boucle "+ i + ", " + time3);
+        //}
 
         /*6- as it is stated, cleanup*/
         System.out.println("Cleaning up kinect");
