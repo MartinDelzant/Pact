@@ -47,6 +47,7 @@ public class KinectMatrice {
                int idx_depth = depth_bytes_per_pixels * (x + y*width);
 
              int resu;
+             double fin;
             
              if (is_playback) {
               
@@ -62,7 +63,7 @@ public class KinectMatrice {
                resu = (b1<<8) | b2;
              }
              
-             resu= (int) (1000*(resu-746.2)/73.85);
+             fin = (1000*(resu-746.2)/73.85);
              if ((resu==17600)||resu<0) resu=0;
              matrice[x][y]=resu;
 	}
@@ -74,47 +75,4 @@ public class KinectMatrice {
 			return matrice;
 		}
 }
-/** for (int y=0; y<height;y++) 	{
-               for (int x=0; x<width; x++) {
-            	
 
-            	   ByteBuffer depth_data = depth_image.getByteBuffer();
-                   ByteBuffer rescale_depth_data = null;
-                int idx_depth = depth_bytes_per_pixels * (x + y*width);
-  
-                int resu;
-               
-                if (is_playback) {
-                 
-                  resu = depth_data.get(idx_depth);
-                  if (resu<0) resu = 255+resu;
-                } else {
-                 
-                  int b1 = depth_data.get(idx_depth);
-                  int b2 = depth_data.get(idx_depth+1);
-                  if (b1<0) b1=255+b1;
-                  if (b2<0) b2=255+b2;
-
-                  resu = (b1<<8) | b2;
-                }
-                matrice[x][y]=resu;
-
-//                	System.out.println("x="+x+" y=" +y+ "   " +matrice[x][y]);
-//                final String chemin = "C:/tmp.txt";
-//                final File fichier =new File(chemin); 
-//                try {
-//                    // Creation du fichier
-//                    fichier .createNewFile();
-//                    // creation d'un writer (un écrivain)
-//                    final FileWriter writer = new FileWriter(fichier);
-//                    try {
-//                        writer.write("ceci est un texte\n");
-//                        writer.write("encore et encore");
-//                    } finally {
-//                        // quoiqu'il arrive, on ferme le fichier
-//                        writer.close();
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println("Impossible de creer le fichier");
-//                }
-                }}*/
