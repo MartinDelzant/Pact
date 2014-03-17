@@ -53,7 +53,7 @@ public class MainProgramme {
 //		- largeurBlock - Math.abs(yImage2 - yImage1); yDepart++) {
 		int xxDepart = 320;
 		int yyDepart = 240;
-		
+		 
 		for (int xDepart = xxDepart - (hauteurRange / 2); xDepart <= xxDepart
 				+ (hauteurRange / 2); xDepart++) {
 			for (int yDepart = yyDepart - (largeurRange / 2); yDepart <= yyDepart
