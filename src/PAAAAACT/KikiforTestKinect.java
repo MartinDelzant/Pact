@@ -23,10 +23,8 @@ import wavreading.Son;
 
 import java.awt.GridLayout;
 
-public class Kiki {
+public class KikiforTestKinect { //permet de faire fonctionner le test sur la kinect
 	
-	
-
     /*helper function to create a frame recorder*/
     public static FrameRecorder CreateRecorder(String fileName, int width, int height, int codecID) throws Exception {
       FrameRecorder recorder = new OpenCVFrameRecorder(fileName, width, height);
@@ -36,7 +34,7 @@ public class Kiki {
       return recorder;
     }
 
-    public static ResultatKinect kiki(/*String[] args*/) throws Exception {
+    public static ResultatKinect kiki() throws Exception {
        /*default values*/
        int depth_min = 0;
        int depth_max = 2048;
@@ -57,11 +55,12 @@ public class Kiki {
        boolean rescale = false;
        show_color = true ;
        
-       float[][] matriceLum = new float[640][480]; 
+       float[][] matriceLum = new float[640][480]; //matrice des composantes couleurs pour le module estimation de mouvement
        float[][] oldMatriceLum;
-       ResultatKinect retour =null;
        
-        
+       ResultatKinect retour =null;//retour de la kinect qui combine les différentes matrices pour les autres modules
+       
+     
       try{ 
         boolean clamp_rgb = false;
         boolean clamp_depth = true;
@@ -199,17 +198,16 @@ public class Kiki {
           2- clamp depth and RGB values based on depth value
           3- display/record modified frames
         */   
-       
-       while (mainframe.isVisible() ) {
         
-        	
+       //pas de boucle, on ne veut qu'une seule image
+        
            if (rgb_grabber != null) {
             rgb_image = rgb_grabber.grab();
             if ((rgb_image != null) && (recorder_orig_color != null)) recorder_orig_color.record(rgb_image);
             }
 
            depth_image = depth_grabber.grab();
-           if (depth_image == null) continue;
+         
 
            if (recorder_orig_depth != null) recorder_orig_depth.record(depth_image);
 
@@ -219,37 +217,16 @@ public class Kiki {
            }
          
           KinectMatrice test = new KinectMatrice(depth_image, is_playback,depth_bytes_per_pixels);
-           //création et initialisation de profondeur pour le module détection de plan
-         test.initializeListetMatrice();
+          //creation d'un object Kinect matrice pour stocker la matrice de profondeur
+         test.initializeListetMatrice(); //initialisation de la matrice de profondeur et de la liste pour le module detection de plan
         
-        CConnexe testGauche = new CConnexe(test.matriceGauche);//application de la méthode pour détecter les composantes connexes sur la matrice de profondeur divisée en trois parties
-        CConnexe testDroite = new CConnexe(test.matriceDroite);
-        CConnexe testMilieu= new CConnexe(test.matriceMilieu);
-        
-        
-        if (testGauche.contientObjet){//déclenchement des alarmes gauche, droite et milieu suivant les cas
-        	if (testMilieu.contientObjet){
-        			Son.lireSon("data/AlarmMilieu.wav", 500);
-        	} else {
-        		if (! testDroite.contientObjet){
-        			Son.lireSon("data/AlarmGauche.wav", 500);
-        		}
-        	}
-        }else {
-        	if (testMilieu.contientObjet){
-        		Son.lireSon("data/AlarmMilieu.wav", 500);
-        	}else{
-        		if (testDroite.contientObjet){
-        			Son.lireSon("data/AlarmDroite.wav", 500);
-        		}
-        		
-        	}
-        }
+         
           
-         KinectMatriceColor test2 = new KinectMatriceColor(rgb_image);//création et initialisation de la matrice de luminance pour l'estimation de mouvement
+         KinectMatriceColor test2 = new KinectMatriceColor(rgb_image);//creation des matrice de luminances pour le module estimation de mouvement
          oldMatriceLum = matriceLum ;
          test2.initializeMatrice();
          matriceLum = test2.getMatriceLum();
+
            
          retour = new ResultatKinect(test.getMatrice(),matriceLum, oldMatriceLum,test.getList());
            
@@ -335,10 +312,8 @@ public class Kiki {
            if (is_playback) Thread.sleep(100);
            
         
-//           time2 = System.currentTimeMillis();
-//           time3 = time2 - time ;
-          // System.out.println("Temps : boucle "+ i + ", " + time3);
-        }
+
+        //}
 
         /*6- as it is stated, cleanup*/
         System.out.println("Cleaning up kinect");
@@ -375,4 +350,3 @@ public class Kiki {
     	return res ;
     }
 }
-

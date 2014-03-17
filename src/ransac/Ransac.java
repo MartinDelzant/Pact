@@ -1,166 +1,151 @@
 package ransac;
 
-
-
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
-/**
- * @param <T>
- *            Class des donnees
- * @param <S>
- *            Class des parametres 
- */
-public class Ransac<T, S> {
-	
-	private List<S> parameters = null;
-	private ParameterEstimator<T, S> paramEstimator;
+
+
+ 
+public class Ransac 
+{
+	private List<Point3D> parametres;
+	private ParameterEstimateur paramEstimator;
 	private boolean[] MeilleurVotes;
-	private int numPourEstimer;
+	private int minDonneesEstime;
 	private double MaxAberrantesPourcentage;
 
 	
 	public boolean[] getMeilleurVotes() {
 		return MeilleurVotes;
+}
+	
+	
+	// @return La  Meilleure liste du modelèle souhaité.
+	 
+	public List<Point3D> getParameters() {
+		return parametres;
 	}
-
+	
 	/**
-	 * @return The Meilleur list des model.
+	 *Le constructeur de l'objet RANSAC
+	 * @param MaxAberrantesPourcentage
+	 *            le max pourcentage des points aberrantes.
 	 */
-	public List<S> getParameters() {
-		return parameters;
-	}
-
-	/**
-	 * This is the constructor of the new ransac object.
-	 * 
-	 * @param paramEstimator
-	 *            The parameter estimator to be use.
-	 * @param numForEstimate
-	 *            The minimal data record number needed to estimate model
-	 *            parameters.
-	 * @param maximalOutlierPercentage
-	 *            The maximal outlier percentage.
-	 */
-	public Ransac(ParameterEstimator<T, S> paramEstimator, int numForEstimate,
-			double maximalOutlierPercentage) {
+	public Ransac( double MaxAberrantesPourcentage,ParameterEstimateur paramEstimator) {
 		this.paramEstimator = paramEstimator;
-		this.numPourEstimer = numForEstimate;
 		this.MaxAberrantesPourcentage = MaxAberrantesPourcentage;
+		
 	}
-
+	
 	/**
-	 * This method is used to run the RANSAC process.
+	 * Cette methode est utilisée pour exécuter RANSAC.
 	 * 
 	 * @param data
-	 *            The data sample.
-	 * @param desiredProbabilityForNoOutliers
-	 *            The probability needed in the estimation.
-	 * @return The percentage of data used to estimate the best result.
+	 *            les données utilisées.
+	 * @param probaDeLEstimation
+	 *            La probabilité utile pour l'estimation.
+	 * @return Les parametres du MeilleurPlan
 	 */
 	
 	//*************************************************************************************************************
 		
-	    public double compute(List<T> data, double desiredProbabilityForNoOutliers) {
-		int dataSize = data.size();
+	    public Resultat Algo(List<Point3D> data, double probaDeLEstimation) {
 		
-		if (dataSize < numPourEstimer || MaxAberrantesPourcentage >= 1.0) {
-			return 0.0;
-		}
+	    	int dataSize = data.size();
 		
-		List<T> DataExact = new ArrayList<T>();
-		List<T> MoindreCarreData;
-		List<S> exactedParams;
+	    	if (dataSize < minDonneesEstime || probaDeLEstimation >= 1.0) {
+			return null;
+	    	}
 		
-		int MeilleurSize, SizeActuel, NbeEssai;
+		List<Point3D> DataExact = new ArrayList<Point3D>();
+		List<Point3D> MoindreCarreData;
+		List<Double> PlanPossible,PlanChoisi ;
+		
+		int MeilleurSize, SizeActuel, NbeEssai,i1,i2,i3;
 		MeilleurVotes = new boolean[dataSize];
 		boolean[] VotesActuel = new boolean[dataSize];
-		boolean[] nonChoisi = new boolean[dataSize];
-		Set<int[]>EnsembleChoisi = new HashSet<int[]>();
-		int[] curSubSetIndexes;
-		double outlierPercentage = MaxAberrantesPourcentage;
-		double numerateur = Math.log(1.0 - desiredProbabilityForNoOutliers);
-		double denominateur = Math.log(1 - Math.pow(1 - MaxAberrantesPourcentage, numPourEstimer));
-		
-		if (parameters != null) {
-			parameters.clear();
-		} else {
-			parameters = new ArrayList<S>();
-		}
-		MeilleurSize = -1;
-		Random random = new Random(new Date().getTime());
-		NbeEssai = (int) Math.round(numerateur / denominateur);
-		for (int i = 0; i < NbeEssai; i++) {
-			// initiate a new iterator
-			for (int j = 0; j < nonChoisi.length; j++) {
-				nonChoisi[j] = true;
-			}
-			curSubSetIndexes = new int[numPourEstimer];
-			DataExact.clear();
-			// randomly select data
-			for (int j = 0; j < numPourEstimer; j++) {
-				int selectedIndex = random.nextInt(dataSize - j);
-				int k, l;
-				for (k = 0, l = -1; k < dataSize && l < selectedIndex; k++) {
-					if (nonChoisi[k]) {
-						l++;
+		double numerateur = Math.log(1.0 - probaDeLEstimation);
+		double denominateur = Math.log(1 - Math.pow(1 - MaxAberrantesPourcentage, 3));
+	   
+		//vider la liste des paramètres si elle existe
+				
+			    PlanChoisi = new ArrayList<Double>();
+				MeilleurSize = -1;
+				Random random = new Random(new Date().getTime());
+				
+				NbeEssai = (int) Math.round(numerateur / denominateur);
+	    
+			for (int i = 0; i < NbeEssai; i++) {	
+						
+						// initializer l'itérateur
+						
+						DataExact.clear();
+						
+						// sélection aléatoire des données
+					do{		
+						 i1 =random.nextInt(dataSize );
+						 //System.out.print(i1);
+						 i2 =random.nextInt(dataSize-1);
+						// System.out.print(i2);
+					  	 i3 =random.nextInt(dataSize-2);
+					  	//System.out.print(i3);
+					  }
+					while(PlanEstimateur.testAlignement(data.get(i1), data.get(i2), data.get(i3)));		
+					  
+		 
+					
+					//Estimer le plan passant par ces 3 points
+					PlanPossible = paramEstimator.estimerUnPlan(data.get(i1),data.get(i2),data.get(i3));
+					
+					//parcourir l'image pour voir si les points sont à une distance delta 
+					DataExact.clear();
+					SizeActuel = 0;
+					for (int j = 0; j < dataSize; j++) {
+						VotesActuel[j] = false;
 					}
-				}
-				k--;
-				DataExact.add(data.get(k));
-				nonChoisi[k] = false;
-			}
-			for (int j = 0, k = 0; j < dataSize; j++) {
-				if (!nonChoisi[j]) {
-					curSubSetIndexes[k] = j;
-					k++;
-				}
-			}
-			// If the subset is not selected, test it.
-			if (EnsembleChoisi.add(curSubSetIndexes)) {
-				exactedParams = paramEstimator.estimerUnPlan(DataExact);
-				// see how many agree on this estimate
-				SizeActuel = 0;
-				for (int j = 0; j < nonChoisi.length; j++) {
-					VotesActuel[j] = false;
-				}
-				for (int j = 0; j < dataSize; j++) {
-					if (paramEstimator.agree(exactedParams, data.get(j))) {
-						VotesActuel[j] = true;
-						SizeActuel++;
+					for (int j = 0; j < dataSize; j++) {
+						if (paramEstimator.agree(PlanPossible, data.get(j))) {
+							VotesActuel[j] = true;
+							SizeActuel++;
+							DataExact.add(data.get(j));
+						}
 					}
-				}
-				if (SizeActuel > MeilleurSize) {
-					MeilleurSize = SizeActuel;
-					System.arraycopy(VotesActuel, 0, MeilleurVotes, 0, dataSize);
-				}
-				// update the estimate of outliers and the number of iterations
-				// we need
-				outlierPercentage = 1.0 - (double) SizeActuel / (double) dataSize;
-				if (outlierPercentage < MaxAberrantesPourcentage) {
-					MaxAberrantesPourcentage = outlierPercentage;
-					denominateur = Math.log(1 - Math.pow(
-							1 - MaxAberrantesPourcentage, numPourEstimer));
-					NbeEssai = (int) Math.round(numerateur / denominateur);
-				}
-			} else {
-				i--;
-			}
+					
+					//actualiser le tableau de Meilleur vote
+					if (SizeActuel > MeilleurSize) {
+						MeilleurSize = SizeActuel;
+						System.arraycopy(VotesActuel, 0, MeilleurVotes, 0, dataSize);
+					}
+	
+					
 		}
-		EnsembleChoisi.clear();
-		// compute the least squares estimate using the best subset
-		MoindreCarreData = new ArrayList<T>();
-		for (int i = 0; i < dataSize; i++) {
-			if (MeilleurVotes[i]) {
-				MoindreCarreData.add(data.get(i));
+			// Calculer le meilleur plan avec la méthode des moindres carrés
+			MoindreCarreData = new ArrayList<Point3D>();
+			for (int i = 0; i < dataSize; i++) {
+				if (MeilleurVotes[i]) {
+					MoindreCarreData.add(data.get(i));
+				}
+	    //Estimer le meilleur plan
 			}
-		}
-		parameters = paramEstimator.FonctionMoindreCarre(MoindreCarreData);
+				PlanChoisi = paramEstimator.FonctionMoindreCarre(MoindreCarreData);
+	    
+				Resultat r=new Resultat(null,null);
+				r.setData(MoindreCarreData);
+				r.setParam(PlanChoisi);
+				return r;
+			
+			
+	    
+	    }
+	    
 
-		return (double) MeilleurSize / (double) dataSize;
-	}
 }
+
+
+
+
+	    
+	    
+		

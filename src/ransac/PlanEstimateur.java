@@ -1,30 +1,30 @@
 package ransac;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * <pre>
- * This is a estimator for 2D lines based on the equation:
+/*
+ * C'est un estimateur 3D qui correspond à l'équation:
  *     n_x*(x-a_x)+n_y*(y-a_y) +n_z*(z-a_z)=0
- * We use 4 parameters (n_x, n_y, a_x, a_y) to represent a line,
- * in which
- * (n_x, n_y,n_z) is the normal vector of the line, and
+ * on utilise 6 parametres (n_x, n_y,n_z, a_x, a_y,a_z) pour représenter le plan,
+dans lesquels
+ * (n_x, n_y,n_z) est le vecteur normal  , et
  * (n_x*n_x+n_y*n_y)=1.
- * (a_x, a_y,a_z) is a point one the line.
- * </pre>
- * 
- * @author tiger
- */
-public class LineParamEstimator implements ParameterEstimator<Point3D, Double> {
-        private double deltaSquared;
+ * (a_x, a_y,a_z) est un point du plan.
 
-        public LineParamEstimator(double delta) {
+ */
+public class PlanEstimateur implements ParameterEstimateur {
+        private double deltaSquared;
+		private static Vecteur v1;
+		private static Vecteur v2;
+
+        public PlanEstimateur(double delta) {
                 this.deltaSquared = delta * delta;
         }
         // calculer le produit vectoriel de deux vecteurs
-        public Vecteur vectoriel(Vecteur v1, Vecteur v2){
+        public static Vecteur vectoriel(Vecteur v1, Vecteur v2){
     		
     		Vecteur v3 = null;
     		
@@ -36,18 +36,18 @@ public class LineParamEstimator implements ParameterEstimator<Point3D, Double> {
     			return v3;
     	}	
         //tester l'alignement de 3 points
-        public boolean testAlignement(Point3D a,Point3D b,Point3D c){
-        	Vecteur v1=null,v2=null,v3;
-        	v1.setX(a, b);
-        	v1.setY(a, b);
-        	v1.setZ(a, b);
+        public static  boolean testAlignement(Point3D point3d,Point3D point3d2,Point3D point3d3){
         	
-        	v2.setX(a, c);
-        	v2.setY(a, c);
-        	v2.setZ(a, c);
         	
-        	v3=vectoriel(v1,v2);
-        	if(v3==null)
+        	Vecteur v1=new Vecteur(point3d,point3d2);
+        	Vecteur v2=new Vecteur(point3d,point3d3);
+			
+		    double x=(v1.getY()*v2.getZ())-(v1.getZ()*v2.getY());
+		    double y=(v1.getZ()*v2.getX())-(v1.getX()*v2.getZ());
+		    double z=(v1.getX()*v2.getY())-(v1.getY()*v2.getX());
+        	Vecteur v3= new Vecteur(x,y,z);
+        	
+        	if((v3.getX()*v3.getX()+v3.getY()*v3.getY()+v3.getZ()*v3.getZ())==0)
         	return true;
         	else
         	return false;
@@ -77,33 +77,31 @@ public class LineParamEstimator implements ParameterEstimator<Point3D, Double> {
         //***************************************************************************************************//
          //Calculer à partir une liste de points non alignés le plan correspandant
          
-        public List<Double> estimerUnPlan(List<Point3D> data) {
-                if (data.size() < 3) {
-                        return null;
-                }
+        
+		public  List<Double> estimerUnPlan(Point3D a,Point3D b,Point3D c) {
+                
                
            
-         Vecteur v1 = null,v2 = null,normal;
+        
          //les 3 premieres points donnés supposés non alignés 
        
-       v1.setX(data.get(0),data.get(1)); 
-       v2.setX(data.get(0), data.get(2));
+       Vecteur v1=new Vecteur(a,b); 
+       Vecteur v2=new Vecteur(a,c); 
        
-       v1.setY(data.get(0),data.get(1)); 
-       v2.setY(data.get(0), data.get(2));
+        double x=(v1.getY()*v2.getZ())-(v1.getZ()*v2.getY());
+	    double y=(v1.getZ()*v2.getX())-(v1.getX()*v2.getZ());
+	    double z=(v1.getX()*v2.getY())-(v1.getY()*v2.getX());
+	    Vecteur normal= new Vecteur(x,y,z);
+      
        
-       v1.setZ(data.get(0),data.get(1)); 
-       v2.setZ(data.get(0), data.get(2));
-       
-       normal=vectoriel(v1,v2);
        double norm = Math.sqrt(normal.getX()*normal.getX() + normal.getY() * normal.getY() + normal.getZ() * normal.getZ() );
        List<Double> params = new ArrayList<Double>();
        params.add(normal.getX() / norm);
        params.add(normal.getY() / norm);
        params.add(normal.getZ() / norm);
-       params.add(data.get(0).getX());
-       params.add(data.get(0).getY());
-       params.add(data.get(0).getZ());
+       params.add(a.getX());
+       params.add(a.getY());
+       params.add(a.getZ());
        return params;
          
         }
@@ -115,13 +113,14 @@ public class LineParamEstimator implements ParameterEstimator<Point3D, Double> {
         //B=[somme(xi*zi)]
         //	[somme(yi*zi)]
         //	[somme(  zi )]
+        
         public List<Double> FonctionMoindreCarre(List<Point3D> data) {
                 int dataSize = data.size();
                 if (dataSize < 3) {
                         return null;
                 }
                 if (dataSize == 3) {
-                        return estimerUnPlan(data);
+                        return estimerUnPlan(data.get(0),data.get(1),data.get(2));
                 }
                 double nX, nY, nZ , norm;
                 double pointX = 0.0;

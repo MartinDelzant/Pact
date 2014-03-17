@@ -1,131 +1,76 @@
 package ransac;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+public class Test {
 
-public class Test extends JFrame {
+	public static void main(String[] args) {
+		// TODO Auto-generated method s
 
-        /**
-         * Unique ID
-         */
-        private static final long serialVersionUID = 6538463951464863248L;
+		PlanEstimateur p = new PlanEstimateur(0.01);
+		Ransac ransac = new Ransac(0.99, p);
 
-        public Test() {
-                super("Test");
-                setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                setSize(new Dimension(600, 600));
-                setVisible(true);
-                setResizable(false);
-        }
+		List<Double> ParamPlan = new ArrayList<Double>();
+		List<Point3D> data = new ArrayList<Point3D>();
+		List<Point3D> MeilleurPlan = new ArrayList<Point3D>();
 
-        public void paint(Graphics g, int[][] matrice) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setColor(new Color(0xffffff));
-                g2.fillRect(0, 0, 600, 600);
-                g2.translate(300, 300);
-                g2.setColor(new Color(0xcccccc));
-                for (int i = -9; i < 10; i++) {
-                        g2.drawLine(-300, i * 30, 300, i * 30);
-                        g2.drawLine(i * 30, -300, i * 30, 300);
-                }
-                g2.setStroke(new BasicStroke(2));
-                List<Point3D> data = new ArrayList<Point3D>();
-                List<Double> params;
-                LineParamEstimator lpe = new LineParamEstimator(0.5);
+//		data.add(new Point3D(-8, 7, -2));
+//		data.add(new Point3D(10, -1, 4));
+//		data.add(new Point3D(-8.01, 7.96, 0));
+//		data.add(new Point3D(-2.03, -1.94, 1));
+//		data.add(new Point3D(-6.01, 5.56, 1));
+//		data.add(new Point3D(8.03, -7.34, 1));
+//		data.add(new Point3D(-3.01, 3.96, 1));
+//		data.add(new Point3D(5.03, -3.34, 1));
+//		data.add(new Point3D(-7.01, 7.96, 1));
+//		data.add(new Point3D(-3.03, 2.94, 1));
+//		data.add(new Point3D(6.71, -6.56, 1));
+//		data.add(new Point3D(-8.23, 7.44, 1));
+//		data.add(new Point3D(3.31, 4.96, 1));
+//		data.add(new Point3D(-4.33, -3.44, 1));
+//		data.add(new Point3D(-7.01, 7.96, 1));
+//		data.add(new Point3D(-3.03, 2.94, 1));
+//		data.add(new Point3D(5.71, -6.56, 1));
+//		data.add(new Point3D(-6.23, 7.44, 1));
+//		data.add(new Point3D(7.31, 4.96, 1));
+//		data.add(new Point3D(-8.33, -3.44, 1));
 
-//              System.out.println("params:[n_x,n_y,a_x,a_y]");
-//              for (int i = 0; i < 4; i++) {
-//                      System.out.print("\t" + params.get(i));
-//              }
-//              System.out.println();
+		for(int i = 0; i< 640*480 ; i++){
+			Random alea = new Random();
+			data.add(new Point3D(alea.nextDouble()*100, alea.nextDouble()*100, 1));
+		}
+		ParamPlan = ransac.Algo(data, 0.9999).getParam();
+		MeilleurPlan = ransac.Algo(data, 0.9999).getData();
 
-                for (int y=0; y<480;y++){
-        			for (int x=0; x<640; x++) {  
-        		data.add(new Point3D(x,y,matrice[x][y]));
-        			}
-        		}
-                
-                params = lpe.FonctionMoindreCarre(data);
-//              System.out.println("params:[n_x,n_y,a_x,a_y]");
-//              for (int i = 0; i < 4; i++) {
-//                      System.out.print("\t" + params.get(i));
-//              }
-//              System.out.println();
-                Point3D p = new Point3D(2.02, 0.69,5);
-//              System.out.println("Is point " + p + " near line?");
-                if (lpe.agree(params, p)) {
-//                      System.out.println("Yes");
-                        drawPlot(g2, p.getX(), p.getY(), 4, 0x66aa66, true);
-                } else {
-//                      System.out.println("No");
-                        drawPlot(g2, p.getX(), p.getY(), 4, 0xaa3333, true);
-                }
-                for (int i = 0; i < data.size(); i++) {
-//                      int x = (int) Math.round(data.get(i).getX() * 30.0);
-//                      int y = (int) Math.round(data.get(i).getX() * 30.0);
-                        drawPlot(g2, data.get(i).getX(), data.get(i).getY(), 4, 0xaaff00, true);
-                }
-                drawLine(g2, params.get(0), params.get(1), params.get(2),
-                                params.get(3), 1, 0x3366aa);
-                drawLine(g2, params.get(0), params.get(1), params.get(2)-params.get(0)*0.5,
-                                params.get(3)-params.get(1)*0.5, 1, 0x3366aa);
-                drawLine(g2, params.get(0), params.get(1), params.get(2)+params.get(0)*0.5,
-                                params.get(3)+params.get(1)*0.5, 1, 0x3366aa);
-                // g2.fillRect(0, 0, 600, 600);
-                // g2.translate(300, 300);
-                // g2.setColor(new Color(0x000000));
-                // g2.drawLine(100, 40, -80, 300);
-                // g2.setColor(new Color(0xff6600));
-                // g2.drawRect(10, 50, 100, 100);
-                // drawPlot(g2,10,204,5,0x557700,false);
-                // drawPlot(g2,30,204,5,0x3366aa,true);
-                // drawPlot(g2,150,-204,2,0x3366aa,true);
-        }
+		/*
+		 * for(int i=0;i< MeilleurPlan.size();i++){
+		 * System.out.println(MeilleurPlan.get(i)); }
+		 */
+		
+		for (int j = 0; j < ParamPlan.size(); j++) {
+			System.out.println(ParamPlan.get(j));
+		}
 
-        private void drawPlot(Graphics2D g, double x, double y, int size, int rgb,
-                        boolean isFill) {
-                int pX = (int) Math.round(x * 30.0);
-                int pY = (int) Math.round(y * 30.0);
-                Color color = g.getColor();
-                g.setColor(new Color(rgb));
-                if (isFill) {
-                        g.fillRect(pX - size, pY - size, size * 2, size * 2);
-                } else {
-                        g.drawOval(pX - size, pY - size, size * 2, size * 2);
-                }
-                g.setColor(color);
-        }
+		// tester estimerUn Plan
+		/*
+		 * List<Double> e =
+		 * p.estimerUnPlan(data.get(0),data.get(1),data.get(2)); for (int
+		 * i=0;i<e.size();i++){ System.out.print(e.get(i)); } for (int i = 0; i
+		 * < 3; i++) {
+		 */
 
-        private void drawLine(Graphics2D g, double nX, double nY, double aX,
-                        double aY, int size, int rgb) {
-                int w = 30;
-                int y1 = (int) Math.round((nX * (aX + 10.0) / nY + aY) * w);
-                int y2 = (int) Math.round((nX * (aX - 10.0) / nY + aY) * w);
-                Color color = g.getColor();
-                Stroke stroke = g.getStroke();
-                g.setColor(new Color(rgb));
-                g.setStroke(new BasicStroke(size));
-                g.drawLine(-300, y1, 300, y2);
-//              g.drawString("-300, "+y1+", 300, "+y2, -280, -250);
-                g.setColor(color);
-                g.setStroke(stroke);
-        }
+		// initializer l'itérateur
 
-        /**
-         * @param args
-         */
-        public static void main(String[] args) {
-                new Test();
-                //g.finalize();
-        }
+		// sélection aléatoire des données
+		// do{
+		/*
+		 * Random random=new Random(100000); int i1 =random.nextInt(3 );
+		 * System.out.print(i1); int i2 =random.nextInt(2);
+		 * System.out.print(i2); int i3 =random.nextInt(1);
+		 * System.out.print(i3); }
+		 */
+	}
+
 }

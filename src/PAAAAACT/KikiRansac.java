@@ -1,5 +1,6 @@
 package PAAAAACT;
 import java.nio.*;
+import java.util.List;
 
 import com.googlecode.javacpp.Loader;
 import com.googlecode.javacv.*;
@@ -12,6 +13,7 @@ import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.OpenCVFrameGrabber;
 import com.googlecode.javacv.OpenKinectFrameGrabber;
 import com.googlecode.javacv.cpp.freenect; 
+import com.googlecode.javacv.cpp.avcodec.ReSampleContext;
 import com.googlecode.javacv.cpp.freenect.*; 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
@@ -19,18 +21,42 @@ import javax.swing.JFrame;
 import javax.swing.JRootPane;
 
 import pact.cconnexe.CConnexe;
+import ransac.PlanEstimateur;
+import ransac.Point3D;
+import ransac.Ransac;
+import ransac.Resultat;
 import wavreading.Son;
 
 import java.awt.GridLayout;
 
-public class Kiki {
+public class KikiRansac {
+	public static double[][] affiche (double[][] mat){
+		return mat;
+	     }
 	
-	
+    public static void PrintUsage() {
+      System.out.println("KinectGrabber [OPTIONS]");
+      System.out.println("where options can be");
+      System.out.println("\t-min: minimum depth value (default 0). If depth values are below this value, depth is set to 0");
+      System.out.println("\t-max: maximum depth value (default 2048==MAX KINECT DEPTH). If depth values are over this value, depth is set to 0");
+      System.out.println("\t-rescale: rescale depth values to 0-255");
+      System.out.println("\t-show-color: show color frame clamped with depth values - NO CALIBRATION YET");
+      System.out.println("\t-show-orig: show original version of depth and/or color before clamping");
+      System.out.println("\t-rec-depth AVIFILE: records depth video to AVIFILE.");
+      System.out.println("\t-rec-orig-depth AVIFILE: records depth video before clamping to AVIFILE.");
+      System.out.println("\t-rec-color AVIFILE: records color video to AVIFILE.");
+      System.out.println("\t-rec-orig-color AVIFILE: records color video before clamping to AVIFILE.");
+      System.out.println("\t-codec 4CC: sets codec to 4CC (e.g., XVID, DIVX, ...). Default record format is uncompressed video");
+      System.out.println("\t-depth-in AVIFILE: uses AVIFILE as depth source.");
+      System.out.println("\t-color-in AVIFILE: uses AVIFILE as RGB source.");
+      System.out.println("\t-h or -help: prints this screen.");
+    }
 
     /*helper function to create a frame recorder*/
     public static FrameRecorder CreateRecorder(String fileName, int width, int height, int codecID) throws Exception {
       FrameRecorder recorder = new OpenCVFrameRecorder(fileName, width, height);
       recorder.setCodecID(codecID);
+//      recorder.setVideoCodec(codecID);
       recorder.setFrameRate(10.0);
       recorder.start();
       return recorder;
@@ -55,12 +81,17 @@ public class Kiki {
        boolean record_orig_color = false;
        String orig_color_file = "";
        boolean rescale = false;
-       show_color = true ;
        
        float[][] matriceLum = new float[640][480]; 
        float[][] oldMatriceLum;
        ResultatKinect retour =null;
        
+       double time;
+       double time2=0;
+       double time3=0;
+       
+       show_color = true ;
+        
         
       try{ 
         boolean clamp_rgb = false;
@@ -199,9 +230,11 @@ public class Kiki {
           2- clamp depth and RGB values based on depth value
           3- display/record modified frames
         */   
-       
+        long tempsDebutSon = 0 ;
        while (mainframe.isVisible() ) {
         
+       // for(int i = 0 ; i<=10 ; i++) {
+        //	time = System.currentTimeMillis();
         	
            if (rgb_grabber != null) {
             rgb_image = rgb_grabber.grab();
@@ -209,7 +242,7 @@ public class Kiki {
             }
 
            depth_image = depth_grabber.grab();
-           if (depth_image == null) continue;
+           //if (depth_image == null) continue;
 
            if (recorder_orig_depth != null) recorder_orig_depth.record(depth_image);
 
@@ -218,40 +251,29 @@ public class Kiki {
             if (show_color) rgb_orig_frame.showImage(rgb_image);
            }
          
-          KinectMatrice test = new KinectMatrice(depth_image, is_playback,depth_bytes_per_pixels);
-           //création et initialisation de profondeur pour le module détection de plan
-         test.initializeListetMatrice();
-        
-        CConnexe testGauche = new CConnexe(test.matriceGauche);//application de la méthode pour détecter les composantes connexes sur la matrice de profondeur divisée en trois parties
-        CConnexe testDroite = new CConnexe(test.matriceDroite);
-        CConnexe testMilieu= new CConnexe(test.matriceMilieu);
-        
-        
-        if (testGauche.contientObjet){//déclenchement des alarmes gauche, droite et milieu suivant les cas
-        	if (testMilieu.contientObjet){
-        			Son.lireSon("data/AlarmMilieu.wav", 500);
-        	} else {
-        		if (! testDroite.contientObjet){
-        			Son.lireSon("data/AlarmGauche.wav", 500);
-        		}
-        	}
-        }else {
-        	if (testMilieu.contientObjet){
-        		Son.lireSon("data/AlarmMilieu.wav", 500);
-        	}else{
-        		if (testDroite.contientObjet){
-        			Son.lireSon("data/AlarmDroite.wav", 500);
-        		}
-        		
-        	}
-        }
-          
-         KinectMatriceColor test2 = new KinectMatriceColor(rgb_image);//création et initialisation de la matrice de luminance pour l'estimation de mouvement
-         oldMatriceLum = matriceLum ;
-         test2.initializeMatrice();
-         matriceLum = test2.getMatriceLum();
-           
-         retour = new ResultatKinect(test.getMatrice(),matriceLum, oldMatriceLum,test.getList());
+         KinectMatrice test = new KinectMatrice(depth_image, is_playback,depth_bytes_per_pixels);
+       //création et initialisation de profondeur pour le module détection de plan
+        test.initializeListetMatrice();
+       	PlanEstimateur p=new PlanEstimateur(0.01) ;  //creation du plan pour ransac     
+		Ransac ransac= new Ransac(0.1, p);
+		
+		System.out.println("Je suis avant Ransac ") ;
+ 		Resultat resultatransac1 = ransac.Algo(test.getList(), 0.99);//premiere application de ransac pour trouver un plan
+		List<Point3D> inter = resultatransac1.getNewList(resultatransac1.getData(),test.getList());
+ 		Resultat resultatransac2= ransac.Algo(inter, 0.99);
+ 		Resultat resultatransac3= ransac.Algo(resultatransac2.getNewList(resultatransac2.getData(),inter), 0.99);
+ 		List<Double> MeilleurPlan=resultatransac1.getParam();
+// 		for(int i=0;i< MeilleurPlan.size();i++){
+// 			System.out.println(MeilleurPlan.get(i));
+// 		}
+ 		test.setMatriceZero(resultatransac1.getData());
+ 		
+ 		CConnexe fin = new CConnexe(test.getMatrice());
+ 		 if(fin.contientObjet){
+       	 Son.lireSon("data/AlarmMilieu.wav", 500);
+         }
+ 
+         
            
            if (clamp_depth || rescale) {
              ByteBuffer depth_data = depth_image.getByteBuffer();
@@ -375,4 +397,5 @@ public class Kiki {
     	return res ;
     }
 }
+
 

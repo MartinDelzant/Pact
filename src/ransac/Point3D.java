@@ -1,5 +1,6 @@
 package ransac;
 
+
 public class Point3D {
         
         private double x;
@@ -7,14 +8,14 @@ public class Point3D {
         private double z;
         
         public Point3D(double x, double y,double z) {
-                this.setX(x);
-                this.setY(y);
-                this.setZ(z);
+                this.x=x;
+                this.y=y;
+                this.z=z;
         }
 
        
         public String toString() {
-                return "("+this.x + ", " + this.y+")";
+                return "("+this.x + ", " + this.y+", "+this.z+")";
         }
 
 
