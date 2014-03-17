@@ -15,9 +15,11 @@ public class Synthese {
 		
 		
 		float[] frequences = new float[2];
-		frequences[0] = (float)400.0 ;
-		frequences[1] = (float)400.0 ;
-		WavFile.createWaveFile("data/AlarmGauche.wav", 2, 44100, 0.5 , frequences);
+		frequences[0] = (float) 0;
+		frequences[1] = (float) 0;
+		String file = "data/Silence.wav" ;
+		WavFile.createWaveFile( file , 2, 44100, 0.5 , frequences);
+		Son.lireSon(file, 500);
 		
 	}
 

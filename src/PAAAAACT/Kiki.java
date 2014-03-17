@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JRootPane;
 
 import pact.cconnexe.CConnexe;
+import wavreading.AlarmeDroite;
 import wavreading.Son;
 
 import java.awt.GridLayout;
@@ -221,6 +222,8 @@ public class Kiki {
           KinectMatrice test = new KinectMatrice(depth_image, is_playback,depth_bytes_per_pixels);
            //création et initialisation de profondeur pour le module détection de plan
          test.initializeListetMatrice();
+        
+        new Thread(new AlarmeDroite()).start();
         
         CConnexe testGauche = new CConnexe(test.matriceGauche);//application de la méthode pour détecter les composantes connexes sur la matrice de profondeur divisée en trois parties
         CConnexe testDroite = new CConnexe(test.matriceDroite);

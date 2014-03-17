@@ -5,7 +5,7 @@ import java.io.*;
 
 import javax.sound.sampled.*;
 
-public class Son {
+public class Son{ 
 
 	/*
 	 * @param Alarm01 pour lancer l'alarme 1 etc ... 
@@ -51,5 +51,6 @@ public class Son {
 		}
 
 	}
+	
 
 }
