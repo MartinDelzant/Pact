@@ -25,6 +25,8 @@ import ransac.PlanEstimateur;
 import ransac.Point3D;
 import ransac.Ransac;
 import ransac.Resultat;
+import wavreading.AlarmeDroite;
+import wavreading.AlarmeMilieu;
 import wavreading.Son;
 
 import java.awt.GridLayout;
@@ -254,24 +256,32 @@ public class KikiRansac {
          KinectMatrice test = new KinectMatrice(depth_image, is_playback,depth_bytes_per_pixels);
        //création et initialisation de profondeur pour le module détection de plan
         test.initializeListetMatrice();
-       	PlanEstimateur p=new PlanEstimateur(0.01) ;  //creation du plan pour ransac     
+       	PlanEstimateur p=new PlanEstimateur(5) ;  //creation du plan pour ransac     
 		Ransac ransac= new Ransac(0.1, p);
 		
 		System.out.println("Je suis avant Ransac ") ;
  		Resultat resultatransac1 = ransac.Algo(test.getList(), 0.99);//premiere application de ransac pour trouver un plan
-		List<Point3D> inter = resultatransac1.getNewList(resultatransac1.getData(),test.getList());
+		System.out.println("Taille : " + resultatransac1.getData().size());
+ 		List<Point3D> inter = resultatransac1.getNewList(resultatransac1.getData(),test.getList());
  		Resultat resultatransac2= ransac.Algo(inter, 0.99);
- 		Resultat resultatransac3= ransac.Algo(resultatransac2.getNewList(resultatransac2.getData(),inter), 0.99);
- 		List<Double> MeilleurPlan=resultatransac1.getParam();
-// 		for(int i=0;i< MeilleurPlan.size();i++){
+ 		//Resultat resultatransac3= ransac.Algo(resultatransac2.getNewList(resultatransac2.getData(),inter), 0.99);
+// 		List<Double> MeilleurPlan=resultatransac1.getParam();
+//		for(int i=0;i< MeilleurPlan.size();i++){
 // 			System.out.println(MeilleurPlan.get(i));
 // 		}
- 		test.setMatriceZero(resultatransac1.getData());
+//		List<Double> MeilleurPlan2=resultatransac2.getParam();
+//		for(int i=0;i< MeilleurPlan2.size();i++){
+// 			System.out.println("deuxieme plan  "+MeilleurPlan2.get(i));
+// 		}
+ 		System.out.println("Taille : " + resultatransac2.getData().size());
  		
- 		CConnexe fin = new CConnexe(test.getMatrice());
- 		 if(fin.contientObjet){
-       	 Son.lireSon("data/AlarmMilieu.wav", 500);
-         }
+// 		CConnexe fin = new CConnexe(test.getMatrice());
+// 		 if(fin.contientObjet){
+//// 			Thread droite = new Thread(new AlarmeDroite());
+//// 	        droite.setPriority(Thread.MAX_PRIORITY);
+//// 	        droite.start();
+//       	 System.out.println("Alarme ! ");
+//         }
  
          
            

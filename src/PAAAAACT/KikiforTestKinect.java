@@ -23,7 +23,8 @@ import wavreading.Son;
 
 import java.awt.GridLayout;
 
-public class KikiforTestKinect { //permet de faire fonctionner le test sur la kinect
+public class KikiforTestKinect implements Runnable{ //permet de faire fonctionner le test sur la kinect
+	private ResultatKinect resultat;
 	
     /*helper function to create a frame recorder*/
     public static FrameRecorder CreateRecorder(String fileName, int width, int height, int codecID) throws Exception {
@@ -200,14 +201,14 @@ public class KikiforTestKinect { //permet de faire fonctionner le test sur la ki
         */   
         
        //pas de boucle, on ne veut qu'une seule image
-        
+        while (mainframe.isVisible() ) {
            if (rgb_grabber != null) {
             rgb_image = rgb_grabber.grab();
             if ((rgb_image != null) && (recorder_orig_color != null)) recorder_orig_color.record(rgb_image);
             }
 
            depth_image = depth_grabber.grab();
-         
+           if (depth_image == null) continue;
 
            if (recorder_orig_depth != null) recorder_orig_depth.record(depth_image);
 
@@ -312,8 +313,8 @@ public class KikiforTestKinect { //permet de faire fonctionner le test sur la ki
            if (is_playback) Thread.sleep(100);
            
         
-
-        //}
+           Thread.yield();
+        }
 
         /*6- as it is stated, cleanup*/
         System.out.println("Cleaning up kinect");
@@ -349,4 +350,19 @@ public class KikiforTestKinect { //permet de faire fonctionner le test sur la ki
     	
     	return res ;
     }
+    
+    @Override
+	public void run() {
+		try {
+			resultat=kiki();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	public ResultatKinect getResultat() {
+		return resultat;
+	}
 }

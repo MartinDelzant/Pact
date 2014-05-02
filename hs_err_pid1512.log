@@ -1,0 +1,50 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00b5d62a, pid=1512, tid=2364
+#
+# JRE version: Java(TM) SE Runtime Environment (7.0_40-b43) (build 1.7.0_40-b43)
+# Java VM: Java HotSpot(TM) Client VM (24.0-b56 mixed mode, sharing windows-x86 )
+# Problematic frame:
+# J  java.nio.DirectByteBuffer.get(I)B
+#
+# Failed to write core dump. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.sun.com/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00969800):  JavaThread "main" [_thread_in_Java, id=2364, stack(0x00a10000,0x00a60000)]
+
+siginfo: ExceptionCode=0xc0000005, reading address 0x04770020
+
+Registers:
+EAX=0x00000000, EBX=0x379058d0, ECX=0x2395e438, EDX=0x00000000
+ESP=0x00a5fb30, EBP=0x00a5fba0, ESI=0x04770020, EDI=0x00b5d610
+EIP=0x00b5d62a, EFLAGS=0x00010287
+
+Top of Stack: (sp=0x00a5fb30)
+0x00a5fb30:   000000b6 0096a1bc 0096a1e4 0096a1ec
+0x00a5fb40:   0096a1f0 0096a1fc 0000000e 00000000
+0x00a5fb50:   00000000 0096a1c4 0096a100 0096a1c0
+0x00a5fb60:   00969800 00a5fba0 00a5fba0 00a9347b
+0x00a5fb70:   000000b6 00a9347b 00000000 2395e438
+0x00a5fb80:   00a5fb80 32dd56a2 00a5fbc4 32dd5950
+0x00a5fb90:   00000000 32dd57a0 00a5fb78 00a5fbc4
+0x00a5fba0:   00a5fbe8 00a93207 00000000 00000000 
+
+Instructions: (pc=0x00b5d62a)
+0x00b5d60a:   0f 85 30 fa f5 ff 89 84 24 00 c0 ff ff 55 83 ec
+0x00b5d61a:   38 3b 51 18 0f 83 1f 00 00 00 8b 71 08 8b 41 0c
+0x00b5d62a:   0f be 04 16 83 c4 38 5d 85 05 00 01 a6 00 c3 e8
+0x00b5d63a:   52 01 fc ff e8 4d 01 fc ff 89 14 24 e8 45 ff fb 
+
+
+Register to memory mapping:
+
+EAX=0x00000000 is an unknown value
+EBX=0x379058d0 is an oop
+{method} 
+ - klass: {other class}

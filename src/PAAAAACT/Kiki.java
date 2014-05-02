@@ -58,8 +58,9 @@ public class Kiki {
        boolean rescale = false;
        show_color = true ;
        
-       float[][] matriceLum = new float[640][480]; 
-       float[][] oldMatriceLum;
+       float[][] oldMatriceLum = new float[640][480] ;
+       float[][] MatriceLum = new float[640][480] ;
+       
        ResultatKinect retour =null;
        
         
@@ -192,14 +193,16 @@ public class Kiki {
         // Objects allocated with a create*() or clone() factory method are automatically released
         // by the garbage collector, but may still be explicitly released by calling release().
         CvMemStorage storage = CvMemStorage.create();
-        int [][] matrice= new int [depth_image.width()][depth_image.height()];
+      
         
         
         /*5- main loop:
           1- grab depth/rgb, display/record if needed
           2- clamp depth and RGB values based on depth value
           3- display/record modified frames
-        */   
+         
+        */
+        
        
        while (mainframe.isVisible() ) {
         
@@ -223,7 +226,7 @@ public class Kiki {
            //création et initialisation de profondeur pour le module détection de plan
          test.initializeListetMatrice();
         
-        new Thread(new AlarmeDroite()).start();
+        
         
         CConnexe testGauche = new CConnexe(test.matriceGauche);//application de la méthode pour détecter les composantes connexes sur la matrice de profondeur divisée en trois parties
         CConnexe testDroite = new CConnexe(test.matriceDroite);
@@ -250,11 +253,11 @@ public class Kiki {
         }
           
          KinectMatriceColor test2 = new KinectMatriceColor(rgb_image);//création et initialisation de la matrice de luminance pour l'estimation de mouvement
-         oldMatriceLum = matriceLum ;
+         oldMatriceLum = MatriceLum ;
          test2.initializeMatrice();
-         matriceLum = test2.getMatriceLum();
+         MatriceLum = test2.getMatriceLum();
            
-         retour = new ResultatKinect(test.getMatrice(),matriceLum, oldMatriceLum,test.getList());
+         retour = new ResultatKinect(test.getMatrice(),MatriceLum, oldMatriceLum,test.getList());
            
            if (clamp_depth || rescale) {
              ByteBuffer depth_data = depth_image.getByteBuffer();
@@ -337,10 +340,7 @@ public class Kiki {
            
            if (is_playback) Thread.sleep(100);
            
-        
-//           time2 = System.currentTimeMillis();
-//           time3 = time2 - time ;
-          // System.out.println("Temps : boucle "+ i + ", " + time3);
+       
         }
 
         /*6- as it is stated, cleanup*/
@@ -371,11 +371,6 @@ public class Kiki {
       System.exit(0);
       return retour;
     }
-    
-    public double[][] matriceGauche(double[][] matrice){
-    	double[][] res = new double[matrice.length][matrice[0].length];
-    	
-    	return res ;
-    }
+	
 }
 
